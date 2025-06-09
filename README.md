@@ -13,13 +13,25 @@ The available readability tests are:
 * [Dale Chall Readability Score](https://readable.com/readability/new-dale-chall-readability-formula/)
 * [Coleman Liau Index](https://readable.com/readability/coleman-liau-readability-index/)
 
-![Image](https://github.com/user-attachments/assets/ab9640a5-87dc-4929-87d5-44719f1db235)
-
 The results of the enabled tests are displayed at the bottom of textarea fields – either when the "book" header icon is clicked, or at all times, depending on the option selected in the module configuration.
 
 Requires ProcessWire >= 3.0.246 and PHP >= 7.2.0
 
-## Configuration
+![Image](https://github.com/user-attachments/assets/ab9640a5-87dc-4929-87d5-44719f1db235)
+
+## Why is readability important?
+
+[Readable.com](https://readable.com/readability/what-is-readability/) says:
+
+> Readability is partly important because Google considers it a key ranking factor. This is based on human behaviour on websites. If the average person finds website content too difficult to read, they’ll click elsewhere. Google loves readability because it improves UX. Content which is easier to understand will be easier to navigate. This will encourage readers to stay on your page. Which, in turn, improves bounce rates.
+
+And:
+
+> A good score to work for, for the public, is a Flesch Kincaid grade level of 8. This is adequate for 85% of the public to easily understand.
+
+The [Wikipedia article on readability](https://en.wikipedia.org/wiki/Readability) has useful information too.
+
+## Module configuration
 
 * Select which readability tests you want to enable. For each test there is an "about" link to information about the test.
 * Select whether the results of the enabled readability tests should be shown only when the header action icon is clicked (default), or if the results should always be shown.
