@@ -1,0 +1,13 @@
+.tr-readability-results {
+  display: none; }
+
+.tr-show-readability-results .tr-header-action-icon {
+  color: #e83561; }
+.tr-show-readability-results .tr-readability-results {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 20px;
+  padding-top: 8px; }
+
+body.AdminThemeUikitDefault .tr-show-readability-results .tr-header-action-icon {
+  color: var(--main-color); }
