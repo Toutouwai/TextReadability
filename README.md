@@ -13,7 +13,7 @@ The available readability tests are:
 * [Dale Chall Readability Score](https://readable.com/readability/new-dale-chall-readability-formula/)
 * [Coleman Liau Index](https://readable.com/readability/coleman-liau-readability-index/)
 
-The results of the enabled tests are displayed at the bottom of textarea fields – either when the "book" header icon is clicked, or at all times, depending on the option selected in the module configuration.
+The results of the enabled tests are displayed at the bottom of textarea fields – either when the "book" header icon is clicked, or at all times, depending on the option selected in the module configuration. An interpretive tooltip appears when you hover any of the result values.
 
 Requires ProcessWire >= 3.0.246 and PHP >= 7.2.0
 
@@ -36,3 +36,16 @@ The [Wikipedia article on readability](https://en.wikipedia.org/wiki/Readability
 * Select which readability tests you want to enable. For each test there is an "about" link to information about the test.
 * Select whether the results of the enabled readability tests should be shown only when the header action icon is clicked (default), or if the results should always be shown.
 * For multi-language sites, select which ProcessWire language represents English (as the tests are only intended for English text).
+
+## Advanced
+
+If you want to disable the readability test results for a particular textarea field you can hook `TextReadability::allowReadabilityResults`. Example:
+
+```php
+$wire->addHookAfter('TextReadability::allowReadabilityResults', function(HookEvent $event) {
+    $field = $event->arguments(0);
+    $page = $event->arguments(1);
+    // Disable readability results for the "body" field on the "home" page
+    if($field->name === 'body' && $page->template == 'home') $event->return = false;
+});
+```

@@ -1,4 +1,6 @@
 <?php namespace ProcessWire;
+// This is a customised version of https://github.com/DaveChild/Text-Statistics
+// I've added some fixes marked "RPS"
 use DaveChild\TextStatistics as TS;
 
 class TextReadability extends WireData implements Module, ConfigurableModule {
@@ -54,7 +56,6 @@ class TextReadability extends WireData implements Module, ConfigurableModule {
 	 */
 	public function ready() {
 		$this->addHookBefore('InputfieldTextarea::renderReadyHook', $this, 'beforeTextareaRenderReady');
-		$english = $this->getEnglishLanguage();
 	}
 
 	/**
@@ -73,14 +74,17 @@ class TextReadability extends WireData implements Module, ConfigurableModule {
 		// Return early if disallowed according to hookable method
 		if(!$this->allowReadabilityResults($field, $page)) return;
 
-		// Get the (English) text
+		// Get the (English) text via the formatted value to include the results of textformatters like Hanna Code
+		$of = $page->of();
+		$page->of(true);
 		if($inputfield->useLanguages) {
 			$english = $this->englishLanguage ?: $this->getEnglishLanguage();
-			$property = "value{$english}";
-			$text = $inputfield->$property;
+			$text = $page->getLanguageValue($english, $field->name);
 		} else {
-			$text = $inputfield->value;
+			$text = $page->getFormatted($field->name);
 		}
+		$page->of($of);
+
 		// Return early if there is no text
 		if(!$text) return;
 
@@ -106,10 +110,166 @@ class TextReadability extends WireData implements Module, ConfigurableModule {
 		$append = '<div class="tr-readability-results">';
 		foreach($this->enabledTests as $name) {
 			$result = $statistics->$name($text);
-			$append .= "<div><a href='{$this->info[$name]['url']}' target='_blank'>{$this->info[$name]['label']}:</a> <b>$result</b></div>";
+			$tooltip = $this->getResultTooltip($result, $name);
+			$append .= "<div><a href='{$this->info[$name]['url']}' target='_blank'>{$this->info[$name]['label']}:</a> <b uk-tooltip='$tooltip'>$result</b></div>";
 		}
 		$append .= '</div>';
 		$inputfield->appendMarkup($append);
+	}
+
+	/**
+	 * Get an interpretive tooltip for a readability result
+	 *
+	 * @param float $result
+	 * @param string $test
+	 * @return string
+	 */
+	public function ___getResultTooltip($result, $test) {
+
+		// https://en.wikipedia.org/wiki/Flesch%E2%80%93Kincaid_readability_tests#Flesch_reading_ease
+		$flesch_reading_ease = [
+			[
+				'min' => 0,
+				'max' => 10,
+				'desc' => $this->_('Level: Professional. Extremely difficult to read. Best understood by university graduates.'),
+			],
+			[
+				'min' => 10,
+				'max' => 30,
+				'desc' => $this->_('Level: College graduate. Very difficult to read. Best understood by university graduates.'),
+			],
+			[
+				'min' => 30,
+				'max' => 50,
+				'desc' => $this->_('Level: College. Difficult to read.'),
+			],
+			[
+				'min' => 50,
+				'max' => 60,
+				'desc' => $this->_('Level: 10th to 12th grade. Fairly difficult to read.'),
+			],
+			[
+				'min' => 60,
+				'max' => 70,
+				'desc' => $this->_('Level: 8th & 9th grade. Plain English. Easily understood by 13- to 15-year-old students.'),
+			],
+			[
+				'min' => 70,
+				'max' => 80,
+				'desc' => $this->_('Level: 7th grade. Fairly easy to read.'),
+			],
+			[
+				'min' => 80,
+				'max' => 90,
+				'desc' => $this->_('Level: 6th grade. Easy to read. Conversational English for consumers.'),
+			],
+			[
+				'min' => 90,
+				'max' => 10000,
+				'desc' => $this->_('Level: 5th grade. Very easy to read. Easily understood by an average 11-year-old student.'),
+			],
+		];
+
+		// https://originality.ai/blog/new-dale-chall-readability-formula
+		$dale_chall = [
+			[
+				'min' => 0,
+				'max' => 5,
+				'desc' => $this->_('Level: 4th grade and below. Very easy to read.'),
+			],
+			[
+				'min' => 5,
+				'max' => 6,
+				'desc' => $this->_('Level: 5th & 6th grade. Easy to read.'),
+			],
+			[
+				'min' => 6,
+				'max' => 7,
+				'desc' => $this->_('Level: 7th & 8th grade. Conversational English.'),
+			],
+			[
+				'min' => 7,
+				'max' => 8,
+				'desc' => $this->_('Level: 9th & 10th grade. Conversational English.'),
+			],
+			[
+				'min' => 8,
+				'max' => 9,
+				'desc' => $this->_('Level: 11th & 12th grade. Quite hard to read.'),
+			],
+			[
+				'min' => 9,
+				'max' => 10,
+				'desc' => $this->_('Level: College. Difficult to read.'),
+			],
+			[
+				'min' => 10,
+				'max' => 10000,
+				'desc' => $this->_('Level: College graduates. Very difficult to read.'),
+			],
+		];
+
+		$grades = [
+			0 => $this->_('Kindergarten, ages 5-6'),
+			1 => $this->_('1st grade, ages 6-7'),
+			2 => $this->_('2nd grade, ages 7-8'),
+			3 => $this->_('3rd grade, ages 8-9'),
+			4 => $this->_('4th grade, ages 9-10'),
+			5 => $this->_('5th grade, ages 10-11'),
+			6 => $this->_('6th grade, ages 11-12'),
+			7 => $this->_('7th grade, ages 12-13'),
+			8 => $this->_('8th grade, ages 13-14'),
+			9 => $this->_('9th grade (freshman), ages 14-15'),
+			10 => $this->_('10th grade (sophomore), ages 15-16'),
+			11 => $this->_('11th grade (junior), ages 16-17'),
+			12 => $this->_('12th grade (senior), ages 17-18'),
+			13 => $this->_('College freshman, ages 18-19'),
+			14 => $this->_('College sophomore, ages 19-20'),
+			15 => $this->_('College junior, ages 20-21'),
+			16 => $this->_('College senior, ages 21-22'),
+			17 => $this->_('Graduate level, ages 22+'),
+			18 => $this->_('Graduate level, ages 22+'),
+			19 => $this->_('Professional level, ages 22+'),
+			20 => $this->_('Professional level, ages 22+'),
+		];
+
+		switch($test) {
+			case 'fleschKincaidReadingEase':
+				$tooltip = $this->findRangeDescription($result, $flesch_reading_ease);
+				break;
+			case 'daleChallReadabilityScore':
+				$tooltip = $this->findRangeDescription($result, $dale_chall);
+				break;
+			default:
+				$rounded_result = round($result);
+				if($rounded_result > 20) $rounded_result = 20;
+				$tooltip = $grades[$rounded_result];
+				break;
+		}
+		if($test === 'spacheReadabilityScore') {
+			$tooltip .= '. ' . $this->_('This score is only intended for texts that are for children up to 4th grade.');
+		}
+		// Fix for issue where Uikit tooltip contains a colon character
+		// https://github.com/uikit/uikit/issues/3390
+		if($tooltip) $tooltip = 'title: ' . $tooltip;
+		return $tooltip;
+	}
+
+
+	/**
+	 * Find the range a number is in and return its description
+	 *
+	 * @param float $number
+	 * @param array $ranges
+	 * @return string|null
+	 */
+	protected function findRangeDescription($number, $ranges) {
+		foreach($ranges as $range) {
+			if($number >= $range['min'] && $number < $range['max']) {
+				return $range['desc'];
+			}
+		}
+		return null;
 	}
 
 	/**

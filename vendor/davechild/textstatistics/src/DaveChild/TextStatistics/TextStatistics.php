@@ -118,8 +118,8 @@ class TextStatistics
         $maxGradeLevel = (integer) $maxGradeLevel;
         if( $maxGradeLevel )
         {
-        	$this->maxGradeLevel = $maxGradeLevel;
-        	return true;
+            $this->maxGradeLevel = $maxGradeLevel;
+            return true;
         }
         return false;
     }
@@ -342,6 +342,11 @@ class TextStatistics
 
     /**
      * Gives the Dale-Chall readability score of text entered rounded to one digit
+     *
+     * RPS fix for missing adjustment constant of 3.6365 when text has more than 5% difficult words
+     * https://originality.ai/blog/new-dale-chall-readability-formula
+     * https://readabilityformulas.com/the-original-dale-chall-readability-formula/
+     *
      * @param   boolean|string  $strText         Text to be checked
      * @return  int|float
      */
@@ -349,19 +354,21 @@ class TextStatistics
     {
         $strText = $this->setText($strText);
 
+        $percentageOfDifficultWords = Maths::bcCalc(
+            100,
+            '*',
+            Maths::bcCalc(
+                $this->daleChallDifficultWordCount($strText),
+                '/',
+                Text::wordCount($strText, $this->strEncoding)
+            )
+        );
+
         $score = Maths::bcCalc(
             Maths::bcCalc(
                 0.1579,
                 '*',
-                Maths::bcCalc(
-                    100,
-                    '*',
-                    Maths::bcCalc(
-                        $this->daleChallDifficultWordCount($strText),
-                        '/',
-                        Text::wordCount($strText, $this->strEncoding)
-                    )
-                )
+                $percentageOfDifficultWords
             ),
             '+',
             Maths::bcCalc(
@@ -374,6 +381,10 @@ class TextStatistics
                 )
             )
         );
+
+        if($percentageOfDifficultWords > 5) {
+            $score += 3.6365;
+        }
 
         if ($this->normalise) {
             return Maths::normaliseScore($score, 0, 10, $this->dps);
