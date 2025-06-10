@@ -81,9 +81,10 @@ class TextReadability extends WireData implements Module, ConfigurableModule {
 			$english = $this->englishLanguage ?: $this->getEnglishLanguage();
 			$text = $page->getLanguageValue($english, $field->name);
 		} else {
-			$text = $page->getFormatted($field->name);
+			$text = $page->get($field->name);
 		}
 		$page->of($of);
+		$text = strip_tags($text);
 
 		// Return early if there is no text
 		if(!$text) return;
