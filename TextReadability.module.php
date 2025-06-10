@@ -84,7 +84,7 @@ class TextReadability extends WireData implements Module, ConfigurableModule {
 			$text = $page->get($field->name);
 		}
 		$page->of($of);
-		$text = strip_tags($text);
+		$text = strip_tags((string) $text);
 
 		// Return early if there is no text
 		if(!$text) return;
