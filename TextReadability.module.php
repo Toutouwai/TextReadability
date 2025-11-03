@@ -99,11 +99,18 @@ class TextReadability extends WireData implements Module, ConfigurableModule {
 		if($this->showResults === 'always') {
 			$inputfield->wrapClass('tr-show-readability-results');
 		} else {
-			$inputfield->addHeaderAction([
-				'icon' => 'book',
-				'tooltip' => $this->_('Show/hide readability results'),
-				'event' => 'trResultsToggle',
-			]);
+			$actions = $inputfield->addHeaderAction();
+			$addAction = true;
+			foreach($actions as $action) {
+				if(isset($action['event']) && $action['event'] === 'trResultsToggle') $addAction = false;
+			}
+			if($addAction) {
+				$inputfield->addHeaderAction([
+					'icon' => 'book',
+					'tooltip' => $this->_('Show/hide readability results'),
+					'event' => 'trResultsToggle',
+				]);
+			}
 		}
 
 		// Generate and append readability results
