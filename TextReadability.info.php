@@ -3,7 +3,7 @@
 $info = array(
 	'title' => 'Text Readability',
 	'summary' => 'Evaluates the readability of English text in textarea fields using various tests.',
-	'version' => '0.1.4',
+	'version' => '0.1.5',
 	'author' => 'Robin Sallis',
 	'href' => 'https://github.com/Toutouwai/TextReadability',
 	'icon' => 'book',

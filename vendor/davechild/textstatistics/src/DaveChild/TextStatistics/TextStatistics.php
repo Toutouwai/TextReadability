@@ -115,7 +115,7 @@ class TextStatistics
      */
     public function setMaxGradeLevel($maxGradeLevel)
     {
-        $maxGradeLevel = (integer) $maxGradeLevel;
+        $maxGradeLevel = (int) $maxGradeLevel;
         if( $maxGradeLevel )
         {
             $this->maxGradeLevel = $maxGradeLevel;
