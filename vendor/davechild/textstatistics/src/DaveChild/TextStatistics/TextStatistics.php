@@ -115,6 +115,7 @@ class TextStatistics
      */
     public function setMaxGradeLevel($maxGradeLevel)
     {
+		// RPS deprecation fix
         $maxGradeLevel = (int) $maxGradeLevel;
         if( $maxGradeLevel )
         {
